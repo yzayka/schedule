@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="uk">
+<html lang="uk"><head>
+    <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=ai-legible&utm_source=comment&utm_medium=referral&utm_id=a72114ae-cca2-4ba4-8ab1-c76cae2b2a55
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+<meta name="hosting-provider" content="Netlify">
+<meta name="netlify-deploy" content="https://netlify.new/?utm_campaign=ai-legible&amp;utm_source=meta&amp;utm_medium=referral&amp;utm_id=a72114ae-cca2-4ba4-8ab1-c76cae2b2a55">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Розклад: Антикорупційні студії</title>
+    <style>
+        :root {
+            --bg-page: #f4f5f8;
+            --primary-color: #2b195c;
+            --text-main: #1a202c;
+            --text-muted: #4a5568;
+            --border-color: #cbd5e0;
+            --bg-cell: #ffffff;
+            --bg-other-month: #f8fafc;
+            --credit-week: #f5f3f7;
+            --exam-week: #edf2f7;
+        }
+
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-page); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 20px; 
+            line-height: 1.5;
+        }
+
+        h1.main-title { 
+            text-align: center; 
+            color: var(--primary-color); 
+            margin-bottom: 5px; 
+            font-size: 26px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        h2.sub-title { 
+            text-align: center; 
+            color: var(--text-muted); 
+            font-size: 16px; 
+            margin-top: 0; 
+            margin-bottom: 30px; 
+            font-weight: 400; 
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .month-wrapper { 
+            background: #fff; 
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px; 
+            padding: 20px; 
+            overflow-x: auto; 
+        }
+        
+        .month-title { 
+            font-size: 20px; 
+            font-weight: 600; 
+            margin-bottom: 15px; 
+            color: var(--primary-color); 
+            text-align: left;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+            display: inline-block;
+            cursor: pointer;
+            user-select: none;
+            transition: opacity 0.2s;
+        }
+        
+        .month-title:hover {
+            opacity: 0.8;
+        }
+
+        /* Індикатор згортання */
+        .month-title::after {
+            content: '▼';
+            font-size: 12px;
+            vertical-align: middle;
+            margin-left: 10px;
+            color: var(--text-muted);
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .month-wrapper.collapsed .month-title::after {
+            transform: rotate(-90deg);
+        }
+
+        .month-wrapper.collapsed .grid {
+            display: none;
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            min-width: 800px;
+            border-top: 1px solid var(--border-color);
+            border-left: 1px solid var(--border-color);
+        }
+
+        .day-header { 
+            font-weight: 600; 
+            text-align: center; 
+            color: var(--text-muted); 
+            padding: 12px 0; 
+            background: #fdfdfd; 
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        .day-cell { 
+            border-right: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            min-height: 130px; 
+            padding: 30px 8px 8px 8px; 
+            background: var(--bg-cell); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 6px; 
+            position: relative; 
+            cursor: cell; 
+        }
+
+        .day-cell.other-month { background: var(--bg-other-month); opacity: 0.7; }
+        
+        .day-cell.session-credit { background: var(--credit-week) !important; }
+        .day-cell.session-exam { background: var(--exam-week) !important; }
+
+        .date-num { 
+            position: absolute; 
+            top: 6px; 
+            right: 8px; 
+            font-weight: 600; 
+            font-size: 14px; 
+            color: var(--text-muted); 
+            pointer-events: none; 
+        }
+
+        .week-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .event { 
+            font-size: 11px; 
+            padding: 5px 7px; 
+            border-radius: 4px; 
+            line-height: 1.35; 
+            cursor: pointer; 
+            position: relative; 
+            transition: filter 0.15s ease;
+        }
+        
+        .event:hover { filter: brightness(0.95); z-index: 10; }
+        .event.has-note::after { content: '📝'; position: absolute; top: 4px; right: 4px; font-size: 10px; }
+        
+        .time { font-weight: 700; margin-bottom: 3px; font-size: 10.5px; opacity: 0.95; }
+        .subj { font-weight: 600; margin-bottom: 2px; font-size: 11.5px; }
+        .subj.cancelled-text { text-decoration: line-through; opacity: 0.7; }
+        .type { font-style: normal; font-size: 10px; opacity: 0.9; margin-bottom: 2px; }
+        .teacher { font-size: 10px; opacity: 0.9; }
+
+        .save-btn { 
+            position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; 
+            background-color: var(--primary-color); color: #fff; border: none; 
+            border-radius: 4px; font-size: 13px; font-weight: 600; cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; transition: background 0.2s; 
+        }
+        .save-btn:hover { background-color: #1e1141; }
+
+        #context-menu { 
+            position: absolute; background: white; border: 1px solid var(--border-color); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 4px 0; z-index: 2000; display: none; min-width: 180px; 
+            border-radius: 4px;
+        }
+        #context-menu div { padding: 8px 16px; font-size: 12px; cursor: pointer; color: var(--text-main); }
+        #context-menu div:hover { background: var(--bg-page); }
+        #context-menu hr { margin: 4px 0; border: 0; border-top: 1px solid #e2e8f0; }
+        .cm-danger { color: #e53e3e !important; }
+        .cm-warning { color: #d97706 !important; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 3000; }
+        .modal { background: white; padding: 25px; width: 450px; max-width: 90%; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal h3 { margin-top: 0; color: var(--primary-color); font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .modal textarea { width: 100%; height: 120px; padding: 10px; border: 1px solid var(--border-color); border-radius: 3px; resize: vertical; margin-bottom: 15px; box-sizing: border-box; font-family: inherit; font-size: 13px;}
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--text-muted); }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 3px; box-sizing: border-box; font-family: inherit; font-size: 13px;}
+        
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+        .modal-buttons button { padding: 9px 18px; border: none; border-radius: 3px; cursor: pointer; font-weight: 600; font-size: 13px;}
+        .btn-cancel { background: #e2e8f0; color: var(--text-main); }
+        .btn-save { background: var(--primary-color); color: white; }
+
+        @media print {
+            body { background: #fff !important; padding: 0; margin: 0; font-size: 12px; }
+            .save-btn, #context-menu, .modal-overlay { display: none !important; }
+            .container { max-width: 100%; margin: 0; }
+            .month-wrapper { border: none !important; padding: 0 !important; margin-bottom: 30px !important; box-shadow: none !important; page-break-inside: avoid; }
+            
+            /* Примусово розгортаємо згорнуті місяці при друці */
+            .month-wrapper.collapsed .grid { display: grid !important; }
+            .month-title::after { display: none !important; }
+            
+            .grid { border-color: #000 !important; }
+            .day-header, .day-cell { border-color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .event { border: 1px solid #718096 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="main-title">Антикорупційні студії</h1>
+        <h2 class="sub-title">Розклад занять на осінній семестр 2026-2027 н.р.</h2>
+        
+        <div id="calendar-container"></div>
+    </div>
+    
+    <button class="save-btn" onclick="saveAndDownload()">Зберегти та завантажити</button>
+
+    <div id="context-menu" style="display: none; left: 598px; top: 674px;">
+        <div id="cm-add-note" style="display: block;">Додати нотатку</div>
+        <div id="cm-edit-event" style="display: block;">Редагувати заняття</div>
+        <hr id="cm-divider-status" style="display: block;">
+        <div id="cm-status-cancel" class="cm-danger" style="display: block;">Позначити як Скасовано</div>
+        <div id="cm-status-reschedule" class="cm-warning" style="display: block;">Позначити як Перенесено</div>
+        <div id="cm-status-reset" style="display: block;">Відновити статус (Норма)</div>
+        <hr id="cm-divider-danger" style="display: block;">
+        <div id="cm-delete-event" class="cm-danger" style="display: block;">Вилучити заняття</div>
+        <hr id="cm-divider-add">
+        <div id="cm-add-event" style="display: block;">Додати заняття сюди</div>
+    </div>
+
+    <div class="modal-overlay" id="note-modal-edit" style="display: none;">
+        <div class="modal">
+            <h3>Редагувати нотатку</h3>
+            <textarea id="note-textarea" placeholder="Введіть текст нотатки..."></textarea>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModals()">Скасувати</button>
+                <button class="btn-save" onclick="saveNote()">Зберегти</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="note-modal-view" style="display: none;">
+        <div class="modal">
+            <h3>Нотатка</h3>
+            <div id="view-note-text" style="white-space: pre-wrap; margin-bottom: 20px; font-size: 13px; line-height: 1.5; color: var(--text-main);">Topic: My Meetings Academic Integrity, First Class
+Time: Sep 14, 2026 05:00 PM Kyiv
+Join Zoom Meeting
+https://us06web.zoom.us/j/88307431482?pwd=x9CZEzbN8BSUjx3GGI9BLiiUIG6Xg0.1
+
+Meeting ID: 883 0743 1482
+Passcode: 075151</div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModals()">Закрити</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="event-modal-edit" style="display: none;">
+        <div class="modal">
+            <h3 id="event-modal-title">Редагувати заняття</h3>
+            
+            <div class="form-group">
+                <label>Час (напр. 10.00-11.20)</label>
+                <input type="text" id="ev-time">
+            </div>
+            
+            <div class="form-group">
+                <label>Назва дисципліни</label>
+                <input type="text" id="ev-subject">
+            </div>
+            
+            <div class="form-group">
+                <label>Тип (напр. Лекція, Семінар (1с))</label>
+                <input type="text" id="ev-type">
+            </div>
+            
+            <div class="form-group">
+                <label>Викладач</label>
+                <input type="text" id="ev-teacher">
+            </div>
+            
+            <div class="form-group">
+                <label>Категорія (Кольорова тема)</label>
+                <select id="ev-color">
+                    <option value="#3182CE">Лекція (Світло-синій)</option>
+                    <option value="#047857">Семінар (Світло-зелений)</option>
+                    <option value="#0D9488">Англійська (М'ятний)</option>
+                    <option value="#D97706">Інше / Перенесено (Світло-жовтий)</option>
+                    <option value="#DC2626">Важливе (Світло-червоний)</option>
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeModals()">Скасувати</button>
+                <button class="btn-save" onclick="saveEvent()">Зберегти</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let events = [
+    {
+        "date": "2026-09-21",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-09-28",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-10-05",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-10-12",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-10-19",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-10-26",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-11-02",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-11-09",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-11-16",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-11-23",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-09-14",
+        "time": "17.00",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": "Topic: My Meetings Academic Integrity, First Class\nTime: Sep 14, 2026 05:00 PM Kyiv\nJoin Zoom Meeting\nhttps://us06web.zoom.us/j/88307431482?pwd=x9CZEzbN8BSUjx3GGI9BLiiUIG6Xg0.1\n\nMeeting ID: 883 0743 1482\nPasscode: 075151"
+    },
+    {
+        "date": "2026-11-16",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-23",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-14",
+        "time": "17.00-19.00",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": "Topic: My Meetings Academic Integrity, First Class\nTime: Sep 14, 2026 05:00 PM Kyiv"
+    },
+    {
+        "date": "2026-11-16",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-23",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-20",
+        "time": "18.00-19.20",
+        "subject": "Політологія",
+        "type": "Лекція",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-03",
+        "time": "18.00-19.20",
+        "subject": "Політологія",
+        "type": "Лекція",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-10",
+        "time": "18.00-19.20",
+        "subject": "Політологія",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-17",
+        "time": "18.00-19.20",
+        "subject": "Політологія",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-24",
+        "time": "18.00-19.20",
+        "subject": "Політологія",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-15",
+        "time": "17.00",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-20",
+        "time": "19.30-20.50",
+        "subject": "Політологія",
+        "type": "Лекція",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-03",
+        "time": "19.30-20.50",
+        "subject": "Політологія",
+        "type": "Лекція",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-10",
+        "time": "19.30-20.50",
+        "subject": "Політологія",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-17",
+        "time": "19.30-20.50",
+        "subject": "Політологія",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-24",
+        "time": "19.30-20.50",
+        "subject": "Політологія",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Кисельов С.О.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-15",
+        "time": "17.00-19.00",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-28",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-11-04",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-11-11",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-11-18",
+        "time": "16.30-17.50",
+        "subject": "Англійська мова",
+        "type": "Група А23",
+        "teacher": "ст. викл. Максимчук Н.М.",
+        "color": "#0D9488",
+        "note": ""
+    },
+    {
+        "date": "2026-09-16",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#D97706",
+        "note": "",
+        "status": "rescheduled"
+    },
+    {
+        "date": "2026-09-23",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#D97706",
+        "note": "",
+        "status": "rescheduled"
+    },
+    {
+        "date": "2026-10-28",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-04",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-11",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-25",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-12-02",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-14",
+        "time": "18.00-19.20",
+        "subject": "Академічна доброчесність",
+        "type": "Семінар (1с)",
+        "teacher": "",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-21",
+        "time": "18.00-19.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-18",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-14",
+        "time": "19.30-20.50",
+        "subject": "Академічна доброчесність",
+        "type": "Семінар (1с)",
+        "teacher": "",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-16",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#D97706",
+        "note": "",
+        "status": "rescheduled"
+    },
+    {
+        "date": "2026-09-23",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#D97706",
+        "note": "",
+        "status": "rescheduled"
+    },
+    {
+        "date": "2026-10-28",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-04",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-11",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-21",
+        "time": "19.30-20.50",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-18",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-01",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Лекція",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-08",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Лекція",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-15",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-12",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-26",
+        "time": "18.00-19.20",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-01",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Лекція",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-08",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Лекція",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-15",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-05",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-12",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-22",
+        "time": "19.30-20.50",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-26",
+        "time": "19.30-20.50",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-18",
+        "time": "18.00-19.20",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": "",
+        "status": "cancelled"
+    },
+    {
+        "date": "2026-09-25",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Лекція",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-30",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-06",
+        "time": "18.00-19.20",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М., Владислав Бурий",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-20",
+        "time": "18.00-19.20",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-09",
+        "time": "18.00-19.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-18",
+        "time": "19.30-20.50",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": "",
+        "status": "cancelled"
+    },
+    {
+        "date": "2026-09-25",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Лекція",
+        "teacher": "доц. Венгер В.М.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-30",
+        "time": "19.30-20.50",
+        "subject": "Верховенство права та публічне адміністрування",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Венгер В.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-20",
+        "time": "19.30-20.50",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-17",
+        "time": "10.00-11.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-24",
+        "time": "10.00-11.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-31",
+        "time": "10.00-11.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-10",
+        "time": "11.40-13.00",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-17",
+        "time": "11.40-13.00",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-24",
+        "time": "11.40-13.00",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-10-31",
+        "time": "11.40-13.00",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Семінар (1с)",
+        "teacher": "ст.викл. Хутор Т.М.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-11-07",
+        "time": "11.40-13.00",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-19",
+        "time": "13.30-14.50",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Лекція",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-31",
+        "time": "13.30-14.50",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-12-05",
+        "time": "13.30-14.50",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-26",
+        "time": "13.30-14.50",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М., Микола Хавронюк",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-03",
+        "time": "13.30-14.50",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М., Микола Хавронюк",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-10",
+        "time": "13.30-14.50",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М., Микола Хавронюк",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-17",
+        "time": "13.30-14.50",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М., Микола Хавронюк",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-07",
+        "time": "13.30-14.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-19",
+        "time": "15.00-16.20",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Лекція",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-31",
+        "time": "15.00-16.20",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-12-05",
+        "time": "15.00-16.20",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Семінар (1с)",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-26",
+        "time": "15.00-16.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М., Микола Хавронюк",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-03",
+        "time": "15.00-16.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М., Микола Хавронюк",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-10",
+        "time": "15.00-16.20",
+        "subject": "Правові засади та інституційні механізми запобігання корупції",
+        "type": "Лекція",
+        "teacher": "ст.викл. Хутор Т.М., Микола Хавронюк",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-11-07",
+        "time": "15.00-16.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Семінар (1с)",
+        "teacher": "Едем Галімов",
+        "color": "#047857",
+        "note": ""
+    },
+    {
+        "date": "2026-09-26",
+        "time": "16.30-17.50",
+        "subject": "Корупція, державна політика та суспільство",
+        "type": "Лекція",
+        "teacher": "доц. Нестеренко О.В.",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-09-30",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-09-30",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-07",
+        "time": "18.00-19.20",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-10-07",
+        "time": "19.30-20.50",
+        "subject": "Кількісні та якісні методи у дослідженні корупції",
+        "type": "Лекція",
+        "teacher": "Едем Галімов",
+        "color": "#3182CE",
+        "note": ""
+    },
+    {
+        "date": "2026-09-16",
+        "time": "10.00-12.00",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#D97706",
+        "note": "",
+        "status": null
+    }
+];
+        const months = [
+            { y: 2026, m: 8, name: "Вересень 2026" },
+            { y: 2026, m: 9, name: "Жовтень 2026" },
+            { y: 2026, m: 10, name: "Листопад 2026" },
+            { y: 2026, m: 11, name: "Грудень 2026" }
+        ];
+
+        const pastelPalette = {
+            "#3182CE": { bg: "#f0f5fc", border: "#c3d2eb", text: "#1a202c" },
+            "#047857": { bg: "#f0fbf4", border: "#bce4c8", text: "#1a202c" },
+            "#0D9488": { bg: "#f0fcf9", border: "#bbf0e4", text: "#1a202c" },
+            "#D97706": { bg: "#fcf8f0", border: "#ebd8b7", text: "#1a202c" },
+            "#DC2626": { bg: "#fcf0f0", border: "#f0b4b4", text: "#1a202c" }
+        };
+        
+        const container = document.getElementById('calendar-container');
+        const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+        
+        let currentEventId = null;
+        let currentCellDate = null;
+        const contextMenu = document.getElementById('context-menu');
+        
+        function updateIds() {
+            events.forEach((e, i) => e.id = i);
+        }
+        updateIds();
+
+        function renderCalendars() {
+            container.innerHTML = '';
+            const weekOneMonday = new Date(2026, 7, 31);
+            
+            months.forEach(month => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'month-wrapper';
+                
+                // Створюємо клікабельний заголовок
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'month-title';
+                titleDiv.textContent = month.name;
+                titleDiv.title = "Натисніть, щоб згорнути/розгорнути";
+                titleDiv.addEventListener('click', () => {
+                    wrapper.classList.toggle('collapsed');
+                });
+                wrapper.appendChild(titleDiv);
+
+                const grid = document.createElement('div');
+                grid.className = 'grid';
+
+                dayNames.forEach(d => {
+                    grid.innerHTML += `<div class="day-header">${d}</div>`;
+                });
+
+                let firstDay = new Date(month.y, month.m, 1).getDay() - 1;
+                if (firstDay === -1) firstDay = 6;
+
+                let daysInMonth = new Date(month.y, month.m + 1, 0).getDate();
+                let totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7;
+
+                for (let i = 0; i < totalCells; i++) {
+                    let date = new Date(month.y, month.m, i - firstDay + 1);
+                    let dateStr = date.getFullYear() + "-" +
+                                  String(date.getMonth() + 1).padStart(2, '0') + "-" +
+                                  String(date.getDate()).padStart(2, '0');
+
+                    let isOtherMonth = date.getMonth() !== month.m;
+                    let cell = document.createElement('div');
+                    cell.className = 'day-cell' + (isOtherMonth ? ' other-month' : '');
+                    
+                    if (dateStr >= '2026-11-30' && dateStr <= '2026-12-04') {
+                        cell.classList.add('session-credit');
+                    }
+                    if (dateStr >= '2026-12-07' && dateStr <= '2026-12-18') {
+                        cell.classList.add('session-exam');
+                    }
+                    
+                    let cellHtml = `<div class="date-num">${date.getDate()}</div>`;
+                    
+                    if (i % 7 === 0) {
+                        let diffTime = date.getTime() - weekOneMonday.getTime();
+                        let weekNum = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000)) + 1;
+                        if (weekNum >= 1 && weekNum <= 14) {
+                            cellHtml += `<div class="week-badge">Тиждень ${weekNum}</div>`;
+                        }
+                    }
+                    
+                    cell.innerHTML = cellHtml;
+
+                    cell.addEventListener('contextmenu', (evt) => {
+                        evt.preventDefault();
+                        currentEventId = null;
+                        currentCellDate = dateStr;
+                        
+                        document.getElementById('cm-add-note').style.display = 'none';
+                        document.getElementById('cm-edit-event').style.display = 'none';
+                        document.getElementById('cm-delete-event').style.display = 'none';
+                        document.getElementById('cm-status-cancel').style.display = 'none';
+                        document.getElementById('cm-status-reschedule').style.display = 'none';
+                        document.getElementById('cm-status-reset').style.display = 'none';
+                        
+                        document.getElementById('cm-divider-status').style.display = 'none';
+                        document.getElementById('cm-divider-danger').style.display = 'none';
+                        document.getElementById('cm-add-event').style.display = 'block';
+                        
+                        contextMenu.style.display = 'block';
+                        contextMenu.style.left = evt.pageX + 'px';
+                        contextMenu.style.top = evt.pageY + 'px';
+                    });
+
+                    let dayEvents = events.filter(e => e.date === dateStr)
+                                          .sort((a,b) => a.time.localeCompare(b.time));
+                    
+                    dayEvents.forEach(e => {
+                        let evDiv = document.createElement('div');
+                        evDiv.className = 'event' + (e.note ? ' has-note' : '');
+                        evDiv.dataset.id = e.id;
+                        
+                        let style = pastelPalette[e.color] || { bg: e.color, border: "transparent", text: "#fff" };
+                        evDiv.style.backgroundColor = style.bg;
+                        evDiv.style.border = `1px solid ${style.border}`;
+                        evDiv.style.color = style.text;
+
+                        let displayTime = e.time.replace(/Скасовано|Перенесено/g, '').trim();
+                        let subjClasses = "subj";
+                        
+                        if (e.status === 'cancelled') {
+                            displayTime += " (Скасовано)";
+                            subjClasses += " cancelled-text";
+                        } else if (e.status === 'rescheduled') {
+                            displayTime += " (Перенесено)";
+                            subjClasses += " cancelled-text";
+                        }
+                        
+                        evDiv.innerHTML = `
+                            <div class="time">${displayTime}</div>
+                            <div class="${subjClasses}">${e.subject}</div>
+                            <div class="type">${e.type}</div>
+                            ${e.teacher ? `<div class="teacher">${e.teacher}</div>` : ''}
+                        `;
+                        
+                        evDiv.addEventListener('contextmenu', (evt) => {
+                            evt.preventDefault();
+                            evt.stopPropagation(); 
+                            currentEventId = e.id;
+                            currentCellDate = dateStr;
+                            
+                            document.getElementById('cm-add-note').style.display = 'block';
+                            document.getElementById('cm-edit-event').style.display = 'block';
+                            document.getElementById('cm-delete-event').style.display = 'block';
+                            
+                            document.getElementById('cm-status-cancel').style.display = 'block';
+                            document.getElementById('cm-status-reschedule').style.display = 'block';
+                            document.getElementById('cm-status-reset').style.display = 'block';
+                            
+                            document.getElementById('cm-divider-status').style.display = 'block';
+                            document.getElementById('cm-divider-danger').style.display = 'block';
+                            document.getElementById('cm-add-event').style.display = 'block';
+                            
+                            document.getElementById('cm-add-note').textContent = e.note ? "Редагувати нотатку" : "Додати нотатку";
+                            
+                            contextMenu.style.display = 'block';
+                            contextMenu.style.left = evt.pageX + 'px';
+                            contextMenu.style.top = evt.pageY + 'px';
+                        });
+
+                        evDiv.addEventListener('click', (evt) => {
+                            evt.stopPropagation();
+                            if(e.note) {
+                                document.getElementById('view-note-text').textContent = e.note;
+                                document.getElementById('note-modal-view').style.display = 'flex';
+                            }
+                        });
+
+                        cell.appendChild(evDiv);
+                    });
+
+                    grid.appendChild(cell);
+                }
+
+                wrapper.appendChild(grid);
+                container.appendChild(wrapper);
+            });
+        }
+
+        document.addEventListener('click', () => {
+            contextMenu.style.display = 'none';
+        });
+
+        document.getElementById('cm-add-note').addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            contextMenu.style.display = 'none';
+            if (currentEventId !== null) {
+                const ev = events.find(e => e.id === currentEventId);
+                document.getElementById('note-textarea').value = ev.note || '';
+                document.getElementById('note-modal-edit').style.display = 'flex';
+            }
+        });
+
+        document.getElementById('cm-edit-event').addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            contextMenu.style.display = 'none';
+            if (currentEventId !== null) {
+                const ev = events.find(e => e.id === currentEventId);
+                document.getElementById('event-modal-title').textContent = "Редагувати заняття";
+                
+                let rawTime = ev.time.replace(/Скасовано|Перенесено/g, '').trim();
+                
+                document.getElementById('ev-time').value = rawTime;
+                document.getElementById('ev-subject').value = ev.subject;
+                document.getElementById('ev-type').value = ev.type;
+                document.getElementById('ev-teacher').value = ev.teacher;
+                document.getElementById('ev-color').value = ev.color;
+                
+                document.getElementById('event-modal-edit').style.display = 'flex';
+            }
+        });
+
+        document.getElementById('cm-delete-event').addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            contextMenu.style.display = 'none';
+            if (currentEventId !== null) {
+                if(confirm("Ви впевнені, що хочете вилучити це заняття?")) {
+                    events = events.filter(e => e.id !== currentEventId);
+                    updateIds();
+                    renderCalendars();
+                }
+            }
+        });
+        
+        function changeStatus(status) {
+            if (currentEventId !== null) {
+                const ev = events.find(e => e.id === currentEventId);
+                ev.status = status;
+                ev.time = ev.time.replace(/Скасовано|Перенесено/g, '').trim();
+                renderCalendars();
+            }
+        }
+
+        document.getElementById('cm-status-cancel').addEventListener('click', (evt) => {
+            evt.stopPropagation(); contextMenu.style.display = 'none'; changeStatus('cancelled');
+        });
+        document.getElementById('cm-status-reschedule').addEventListener('click', (evt) => {
+            evt.stopPropagation(); contextMenu.style.display = 'none'; changeStatus('rescheduled');
+        });
+        document.getElementById('cm-status-reset').addEventListener('click', (evt) => {
+            evt.stopPropagation(); contextMenu.style.display = 'none'; changeStatus(null);
+        });
+
+        document.getElementById('cm-add-event').addEventListener('click', (evt) => {
+            evt.stopPropagation();
+            contextMenu.style.display = 'none';
+            currentEventId = null; 
+            
+            document.getElementById('event-modal-title').textContent = "Додати заняття (" + currentCellDate + ")";
+            document.getElementById('ev-time').value = "";
+            document.getElementById('ev-subject').value = "";
+            document.getElementById('ev-type').value = "Лекція";
+            document.getElementById('ev-teacher').value = "";
+            document.getElementById('ev-color').value = "#3182CE";
+            
+            document.getElementById('event-modal-edit').style.display = 'flex';
+        });
+
+        function closeModals() {
+            document.getElementById('note-modal-edit').style.display = 'none';
+            document.getElementById('note-modal-view').style.display = 'none';
+            document.getElementById('event-modal-edit').style.display = 'none';
+        }
+
+        function saveNote() {
+            if (currentEventId !== null) {
+                const ev = events.find(e => e.id === currentEventId);
+                ev.note = document.getElementById('note-textarea').value;
+                closeModals();
+                renderCalendars();
+            }
+        }
+
+        function saveEvent() {
+            const time = document.getElementById('ev-time').value.trim();
+            const subject = document.getElementById('ev-subject').value.trim();
+            const type = document.getElementById('ev-type').value.trim();
+            const teacher = document.getElementById('ev-teacher').value.trim();
+            const color = document.getElementById('ev-color').value;
+
+            if(!subject) {
+                alert("Назва дисципліни обов'язкова!");
+                return;
+            }
+
+            if (currentEventId !== null) {
+                const ev = events.find(e => e.id === currentEventId);
+                ev.time = time;
+                ev.subject = subject;
+                ev.type = type;
+                ev.teacher = teacher;
+                ev.color = color;
+            } else {
+                events.push({
+                    date: currentCellDate,
+                    time: time,
+                    subject: subject,
+                    type: type,
+                    teacher: teacher,
+                    color: color,
+                    note: "",
+                    status: null
+                });
+                updateIds();
+            }
+
+            closeModals();
+            renderCalendars();
+        }
+
+        function saveAndDownload() {
+            // Тимчасово очищаємо контейнер, щоб у файл не дублювався згенерований HTML 
+            // (він автоматично перемалюється при наступному відкритті)
+            const container = document.getElementById('calendar-container');
+            const currentHtml = container.innerHTML;
+            container.innerHTML = '';
+
+            let htmlStr = "<!DOCTYPE html>\n<html lang=\"uk\">\n" + document.documentElement.outerHTML + "\n</html>";
+            
+            // Повертаємо сітку розкладу на екран
+            container.innerHTML = currentHtml;
+
+            // Готуємо оновлений масив без технічних ID
+            const cleanEvents = events.map(e => { const {id, ...rest} = e; return rest; });
+            const eventsJson = JSON.stringify(cleanEvents, null, 4);
+            
+            // Надійна заміна масиву через регулярний вираз (ігнорує зміни пробілів/відступів браузером)
+            htmlStr = htmlStr.replace(/let events\s*=\s*\[[\s\S]*?\];\s*const months\s*=/m, `let events = ${eventsJson};\n        const months =`);
+
+            const blob = new Blob([htmlStr], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            
+            const d = new Date();
+            const ts = d.getFullYear() + String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0') + "_" + String(d.getHours()).padStart(2,'0') + String(d.getMinutes()).padStart(2,'0');
+            a.download = `rozklad_${ts}.html`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        renderCalendars();
+    </script>
+
+
+<script async="" src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="a72114ae-cca2-4ba4-8ab1-c76cae2b2a55" data-app-host="app.netlify.com"></script>
+<iframe id="nl-badge-frame" title="Powered by Netlify" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;color-scheme&quot; content=&quot;dark&quot;&gt;&lt;style&gt;
+    :root{--nl-vw:1536px;--nl-vh:776px}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:transparent;overflow:hidden}
+    body{display:flex;align-items:flex-end;justify-content:flex-end;height:100vh;
+      padding:8px 18px 18px 8px;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#f4f9f9;-webkit-font-smoothing:antialiased}
+    .nl-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:10px;width:max-content;max-width:calc(var(--nl-vw,100vw) - 26px)}
+    button{font-family:inherit;cursor:pointer}
+    :focus-visible{outline:2px solid #32e6e2;outline-offset:2px;border-radius:6px}
+    .nl-icon-btn{position:relative;flex:none;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid transparent;background:transparent;color:#d5e3e6;transition:background .15s ease,color .15s ease}
+    .nl-icon-btn:hover{background:rgba(255,255,255,0.08);color:#f4f9f9}
+    .nl-tap::after{content:&quot;&quot;;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:max(100%,44px);height:max(100%,44px)}
+    @keyframes nl-rise{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
+    @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+  
+      .nl-card{position:relative;display:none;width:min(340px,calc(var(--nl-vw,100vw) - 26px));max-height:calc(var(--nl-vh,100vh) - 84px);overflow-y:auto;background:linear-gradient(180deg,#132832 0%,#0e1e25 100%);border:1px solid rgba(255,255,255,0.09);border-radius:18px;padding:18px;transform-origin:bottom right;animation:nl-rise .3s cubic-bezier(.34,1.4,.4,1) both}
+      .nl-card.open{display:block}
+      .nl-card-close{position:absolute;top:10px;right:10px}
+      .nl-card h2{margin:0;padding-right:30px;font-size:16px;font-weight:750;letter-spacing:-0.015em;line-height:1.35}
+      .nl-card h2 em{font-style:normal;background:linear-gradient(90deg,#32e6e2,#4d7cfe,#9a6bff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+      .nl-card p{margin:8px 0 0;font-size:12.5px;color:#d5e3e6}
+      .nl-prompt{position:relative;margin-top:14px;background:#10222b;border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:10px 12px;transition:border-color .15s ease,box-shadow .15s ease}
+      .nl-prompt:focus-within{border-color:#05bdba;box-shadow:0 0 0 3px rgba(5,189,186,0.18)}
+      .nl-prompt textarea{display:block;width:100%;height:38px;resize:none;border:0;outline:none;background:transparent;color:#f4f9f9;font:inherit;font-size:13px;line-height:19px;padding:0 28px 0 0}
+      .nl-prompt textarea::placeholder{color:#a9bdc2}
+      .nl-send{position:absolute;right:9px;bottom:9px;width:24px;height:24px;flex:none;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:#05bdba;color:#02191b;transition:background .15s ease}
+      .nl-send:hover{background:#32e6e2}
+      @media (pointer: coarse){
+        .nl-prompt textarea{font-size:16px;line-height:21px;height:42px}
+      }
+      .nl-or{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:10.5px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#a9bdc2}
+      .nl-or::before,.nl-or::after{content:&quot;&quot;;flex:1;height:1px;background:rgba(255,255,255,0.09)}
+      .nl-drop{display:flex;align-items:center;justify-content:space-between;gap:6px;text-decoration:none;background:#1b3a45;border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:10px 12px;font-size:13px;font-weight:600;color:#cfe0e3;transition:background .15s ease,color .15s ease,border-color .15s ease}
+      .nl-drop:hover{background:#224753;color:#f4f9f9;border-color:rgba(50,230,226,0.3)}
+      .nl-drop .nl-arrow{transition:transform .18s cubic-bezier(.34,1.4,.4,1)}
+      .nl-drop:hover .nl-arrow{transform:translateX(3px)}
+      .nl-badge{display:flex;align-items:center;gap:9px;white-space:nowrap;border:1px solid rgba(255,255,255,0.09);background:linear-gradient(180deg,#142b34,#0e1e25);color:#f4f9f9;border-radius:999px;padding:9px 14px 9px 11px;font-size:13px;font-weight:600;letter-spacing:0.01em;transition:border-color .2s ease}
+      .nl-badge:hover{border-color:rgba(50,230,226,0.26)}
+      .nl-hide{display:block;width:100%;margin-top:10px;border:0;background:transparent;color:#a9bdc2;font-size:11.5px;font-weight:600;padding:4px;border-radius:8px;transition:color .15s ease}
+      .nl-hide:hover{color:#d5e3e6;text-decoration:underline}
+      .nl-badge-label{color:#d5e3e6;font-weight:500}
+      .nl-badge-brand{font-weight:750}
+    &lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+      &lt;div class=&quot;nl-wrap&quot;&gt;
+        &lt;section class=&quot;nl-card&quot; id=&quot;nl-card&quot; aria-label=&quot;Build your own site on Netlify&quot;&gt;
+          &lt;button type=&quot;button&quot; class=&quot;nl-icon-btn nl-tap nl-card-close&quot; id=&quot;nl-card-close&quot; aria-label=&quot;Close&quot;&gt;&lt;svg width=&quot;14&quot; height=&quot;14&quot; viewBox=&quot;0 0 16 16&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.9&quot; stroke-linecap=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5&quot;/&gt;&lt;/svg&gt;&lt;/button&gt;
+          &lt;h2&gt;&lt;em&gt;Build your own site with Netlify&lt;/em&gt;&lt;/h2&gt;
+          &lt;p&gt;Describe what you want, and an AI agent designs, builds and deploys it in minutes.&lt;/p&gt;
+          &lt;form class=&quot;nl-prompt&quot; action=&quot;https://app.netlify.com/start&quot; method=&quot;get&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
+            &lt;textarea name=&quot;prompt&quot; rows=&quot;2&quot; required maxlength=&quot;300&quot; autocomplete=&quot;off&quot;
+                      enterkeyhint=&quot;go&quot;
+                      placeholder=&quot;A shop for my handmade surfboards&amp;hellip;&quot;
+                      aria-label=&quot;Describe the site you want to build&quot;&gt;&lt;/textarea&gt;
+            &lt;button type=&quot;submit&quot; class=&quot;nl-send nl-tap&quot; aria-label=&quot;Build this site&quot;&gt;&lt;svg width=&quot;13&quot; height=&quot;13&quot; viewBox=&quot;0 0 16 16&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot; stroke-linecap=&quot;round&quot; stroke-linejoin=&quot;round&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M8 12.75v-9.5M3.9 7.35 8 3.25l4.1 4.1&quot;/&gt;&lt;/svg&gt;&lt;/button&gt;
+            &lt;input type=&quot;hidden&quot; name=&quot;utm_source&quot; value=&quot;netlify_badge&quot;&gt;
+            
+            &lt;input type=&quot;hidden&quot; name=&quot;utm_id&quot; value=&quot;a72114ae-cca2-4ba4-8ab1-c76cae2b2a55&quot;&gt;
+          &lt;/form&gt;
+          &lt;div class=&quot;nl-or&quot;&gt;&lt;span&gt;or&lt;/span&gt;&lt;/div&gt;
+          &lt;a class=&quot;nl-drop&quot; href=&quot;https://app.netlify.com/drop?utm_source=netlify_badge&amp;utm_id=a72114ae-cca2-4ba4-8ab1-c76cae2b2a55&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;
+            &lt;span&gt;Drop a site you already have&lt;/span&gt;&lt;span class=&quot;nl-arrow&quot; aria-hidden=&quot;true&quot;&gt;&amp;rarr;&lt;/span&gt;
+          &lt;/a&gt;
+          &lt;button type=&quot;button&quot; class=&quot;nl-hide&quot; id=&quot;nl-hide&quot;&gt;Hide this badge&lt;/button&gt;
+        &lt;/section&gt;
+        &lt;button type=&quot;button&quot; class=&quot;nl-badge&quot; id=&quot;nl-badge&quot; aria-expanded=&quot;false&quot; aria-controls=&quot;nl-card&quot;
+                aria-label=&quot;Powered by Netlify — build your own site&quot;&gt;
+          &lt;svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 32 32&quot; fill=&quot;none&quot; aria-hidden=&quot;true&quot;&gt;
+    &lt;path fill=&quot;#fff&quot; d=&quot;M17.9922 18.3225H14.005L13.6746 17.9921V14.005L14.005 13.6746H17.9922L18.3226 14.005V17.9921L17.9922 18.3225Z&quot;/&gt;
+    &lt;g fill=&quot;#05BDBA&quot;&gt;
+      &lt;path d=&quot;M9.6958 24.3311H9.35705L7.6661 22.6401V22.3041L10.2511 19.7164L12.042 19.7191L12.2808 19.9552V21.7461L9.6958 24.3311Z&quot;/&gt;
+      &lt;path d=&quot;M7.6661 9.69576V9.35701L9.35705 7.66606H9.6958L12.2808 10.2511V12.0392L12.042 12.2808H10.2511L7.6661 9.69576Z&quot;/&gt;
+      &lt;path d=&quot;M10.0457 17.4369H0.205466L0 17.2314V14.7658L0.205466 14.5603H10.0457L10.2511 14.7658V17.2314L10.0457 17.4369Z&quot;/&gt;
+      &lt;path d=&quot;M31.7945 17.4369H21.9544L21.7489 17.2314V14.7658L21.9544 14.5603H31.7945L32 14.7658V17.2314L31.7945 17.4369Z&quot;/&gt;
+      &lt;path d=&quot;M14.5631 10.0456V2.66547L14.7686 2.46001H17.2343L17.4396 2.66547V10.0456L17.2343 10.2511H14.7686L14.5631 10.0456Z&quot;/&gt;
+      &lt;path d=&quot;M14.5631 29.3316V21.9515L14.7686 21.746H17.2343L17.4396 21.9515V29.3316L17.2343 29.5371H14.7686L14.5631 29.3316Z&quot;/&gt;
+    &lt;/g&gt;&lt;/svg&gt;
+          &lt;span&gt;&lt;span class=&quot;nl-badge-label&quot;&gt;Powered by&lt;/span&gt; &lt;span class=&quot;nl-badge-brand&quot;&gt;Netlify&lt;/span&gt;&lt;/span&gt;
+        &lt;/button&gt;
+      &lt;/div&gt;
+      &lt;script&gt;
+        
+    function nlSend(){
+      var wrap=document.querySelector('.nl-wrap'),boxes=[];
+      for(var i=0;i&lt;wrap.children.length;i++){
+        var c=wrap.children[i];
+        if(!c.offsetWidth||!c.offsetHeight)continue;
+        boxes.push({x:c.offsetLeft-wrap.offsetLeft+8,
+                    y:c.offsetTop-wrap.offsetTop+8,
+                    w:c.offsetWidth,h:c.offsetHeight});
+      }
+      parent.postMessage({nlHud:'resize',
+        width:wrap.offsetWidth+26,
+        height:wrap.offsetHeight+26,
+        boxes:boxes},'*');
+    }
+    function nlSendSoon(){requestAnimationFrame(nlSend);}
+    window.addEventListener('load',nlSend);
+    window.addEventListener('message',function(e){
+      if(e.source!==parent||!e.data||e.data.nlHud!=='viewport')return;
+      var s=document.documentElement.style;
+      s.setProperty('--nl-vw',e.data.w+'px');
+      s.setProperty('--nl-vh',e.data.h+'px');
+      document.documentElement.classList.toggle('nl-narrow',e.data.w&lt;600);
+      nlSendSoon();
+    });
+    var nlCoarse=window.matchMedia('(pointer: coarse)').matches;
+    function nlSubmit(form){
+      if(form.requestSubmit)return form.requestSubmit();
+      if(form.checkValidity&amp;&amp;!form.checkValidity())
+        return form.reportValidity&amp;&amp;form.reportValidity();
+      form.submit();
+    }
+  
+        var badge=document.getElementById('nl-badge'),card=document.getElementById('nl-card'),
+            box=card.querySelector('textarea');
+        function setOpen(open){
+          card.classList.toggle('open',open);
+          badge.setAttribute('aria-expanded',open?'true':'false');
+          nlSendSoon();
+          if(open&amp;&amp;!nlCoarse)box.focus();
+        }
+        box.addEventListener('keydown',function(e){
+          if(e.key==='Enter'&amp;&amp;!e.shiftKey){e.preventDefault();nlSubmit(box.form);}
+        });
+        badge.addEventListener('click',function(){setOpen(!card.classList.contains('open'));});
+        document.getElementById('nl-card-close').addEventListener('click',function(){setOpen(false);badge.focus();});
+        document.addEventListener('keydown',function(e){
+          if(e.key==='Escape'&amp;&amp;card.classList.contains('open')){setOpen(false);badge.focus();}
+        });
+        document.getElementById('nl-hide').addEventListener('click',function(){
+          parent.postMessage({nlHud:'state',value:'hidden'},'*');
+        });
+      &lt;/script&gt;
+    &lt;/body&gt;&lt;/html&gt;" style="position: fixed; bottom: 0px; right: 0px; border: 0px; margin: 0px; padding: 0px; background: transparent; color-scheme: dark; z-index: 2147483645; width: 197px; height: 64px; clip-path: path(&quot;M 3 3 H 184 V 51 H 3 Z&quot;);" data-nl-ready="1"></iframe>
+
+</body></html>
+</html>
