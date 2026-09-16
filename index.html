@@ -373,15 +373,15 @@
     
     <button class="save-btn" onclick="saveAndDownload()">Зберегти та завантажити</button>
 
-    <div id="context-menu" style="display: none; left: 617px; top: 665px;">
-        <div id="cm-add-note" style="display: block;">Редагувати нотатку</div>
-        <div id="cm-edit-event" style="display: block;">Редагувати заняття</div>
-        <hr id="cm-divider-status" style="display: block;">
-        <div id="cm-status-cancel" class="cm-danger" style="display: block;">Позначити як Скасовано</div>
-        <div id="cm-status-reschedule" class="cm-warning" style="display: block;">Позначити як Перенесено</div>
-        <div id="cm-status-reset" style="display: block;">Відновити статус (Норма)</div>
-        <hr id="cm-divider-danger" style="display: block;">
-        <div id="cm-delete-event" class="cm-danger" style="display: block;">Вилучити заняття</div>
+    <div id="context-menu" style="display: none; left: 579px; top: 880px;">
+        <div id="cm-add-note" style="display: none;">Редагувати нотатку</div>
+        <div id="cm-edit-event" style="display: none;">Редагувати заняття</div>
+        <hr id="cm-divider-status" style="display: none;">
+        <div id="cm-status-cancel" class="cm-danger" style="display: none;">Позначити як Скасовано</div>
+        <div id="cm-status-reschedule" class="cm-warning" style="display: none;">Позначити як Перенесено</div>
+        <div id="cm-status-reset" style="display: none;">Відновити статус (Норма)</div>
+        <hr id="cm-divider-danger" style="display: none;">
+        <div id="cm-delete-event" class="cm-danger" style="display: none;">Вилучити заняття</div>
         <hr id="cm-divider-add">
         <div id="cm-add-event" style="display: block;">Додати заняття сюди</div>
     </div>
@@ -413,7 +413,7 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
 
     <div class="modal-overlay" id="event-modal-edit" style="display: none;">
         <div class="modal">
-            <h3 id="event-modal-title">Редагувати заняття</h3>
+            <h3 id="event-modal-title">Додати заняття (2026-09-23)</h3>
             
             <div class="form-group">
                 <label>Час (напр. 10.00-11.20)</label>
@@ -1312,6 +1312,36 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
         "color": "#3182CE",
         "note": "Topic: My Meetings Academic Integrity, Third Class\nTime: Sep 16, 2026 10:00 AM Kyiv\nJoin Zoom Meeting\nhttps://us06web.zoom.us/j/83759782382?pwd=kag7ZXQgNx7n5cm1KJ716LvFZhydnP.1",
         "status": null
+    },
+    {
+        "date": "2026-09-21",
+        "time": "13.00-15.00",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": "",
+        "status": null
+    },
+    {
+        "date": "2026-09-22",
+        "time": "17.00-19.00",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": "",
+        "status": null
+    },
+    {
+        "date": "2026-09-23",
+        "time": "?",
+        "subject": "Академічна доброчесність",
+        "type": "Лекція",
+        "teacher": "",
+        "color": "#3182CE",
+        "note": "",
+        "status": null
     }
 ];
         const months = [
@@ -1807,6 +1837,8 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
 <script src="chrome-extension://onhiacboedfinnofagfgoaanfedhmfab/dist/quick-control-panel/runtime.js" defer=""></script><script src="chrome-extension://onhiacboedfinnofagfgoaanfedhmfab/dist/quick-control-panel/main.js" defer=""></script>
 
 <div id="Reverso_extension__quick_control_panel" style="z-index: 2147483647; position: relative;"><re-quick-control-panel ng-version="21.2.17"></re-quick-control-panel></div><script src="chrome-extension://onhiacboedfinnofagfgoaanfedhmfab/dist/quick-control-panel/runtime.js" defer=""></script><script src="chrome-extension://onhiacboedfinnofagfgoaanfedhmfab/dist/quick-control-panel/main.js" defer=""></script>
+
+
 
 </body></html>
 </html>
