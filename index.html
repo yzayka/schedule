@@ -174,6 +174,17 @@
         .subj.cancelled-text { text-decoration: line-through; opacity: 0.7; }
         .type { font-style: normal; font-size: 10px; opacity: 0.9; margin-bottom: 2px; }
         .teacher { font-size: 10px; opacity: 0.9; }
+        .event-link { 
+            font-size: 11px; 
+            color: #0056b3; 
+            text-decoration: underline; 
+            margin-top: 4px; 
+            display: inline-block; 
+            word-break: break-all;
+            position: relative;
+            z-index: 20;
+        }
+        .event-link:hover { color: #003d82; }
 
         .save-btn { 
             position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; 
@@ -1011,6 +1022,11 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
             <div class="form-group">
                 <label>Викладач</label>
                 <input type="text" id="ev-teacher">
+            </div>
+            
+            <div class="form-group">
+                <label>Покликання на заняття (URL)</label>
+                <input type="url" id="ev-link" placeholder="https://...">
             </div>
             
             <div class="form-group">
@@ -2039,6 +2055,7 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
                             <div class="${subjClasses}">${e.subject}</div>
                             <div class="type">${e.type}</div>
                             ${e.teacher ? `<div class="teacher">${e.teacher}</div>` : ''}
+                            ${e.link ? `<a href="${e.link}" target="_blank" class="event-link" onclick="event.stopPropagation()">Покликання</a>` : ''}
                         `;
                         
                         evDiv.addEventListener('contextmenu', (evt) => {
@@ -2112,6 +2129,7 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
                 document.getElementById('ev-subject').value = ev.subject;
                 document.getElementById('ev-type').value = ev.type;
                 document.getElementById('ev-teacher').value = ev.teacher;
+                document.getElementById('ev-link').value = ev.link || '';
                 document.getElementById('ev-color').value = ev.color;
                 
                 document.getElementById('event-modal-edit').style.display = 'flex';
@@ -2159,6 +2177,7 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
             document.getElementById('ev-subject').value = "";
             document.getElementById('ev-type').value = "Лекція";
             document.getElementById('ev-teacher').value = "";
+            document.getElementById('ev-link').value = "";
             document.getElementById('ev-color').value = "#3182CE";
             
             document.getElementById('event-modal-edit').style.display = 'flex';
@@ -2184,6 +2203,7 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
             const subject = document.getElementById('ev-subject').value.trim();
             const type = document.getElementById('ev-type').value.trim();
             const teacher = document.getElementById('ev-teacher').value.trim();
+            const link = document.getElementById('ev-link').value.trim();
             const color = document.getElementById('ev-color').value;
 
             if(!subject) {
@@ -2197,6 +2217,7 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
                 ev.subject = subject;
                 ev.type = type;
                 ev.teacher = teacher;
+                ev.link = link;
                 ev.color = color;
             } else {
                 events.push({
@@ -2205,6 +2226,7 @@ https://us06web.zoom.us/j/86537361749?pwd=rGJfWjiYrc56BUQQbxhJ7NmWHqJKH9.1
                     subject: subject,
                     type: type,
                     teacher: teacher,
+                    link: link,
                     color: color,
                     note: "",
                     status: null
